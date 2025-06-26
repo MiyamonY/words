@@ -19,7 +19,7 @@ const schema = a.schema({
   }),
   wordDetails: a
     .generation({
-      aiModel: a.ai.model("Claude 3.5 Sonnet v2"),
+      aiModel: a.ai.model("Claude 3.5 Sonnet"),
       systemPrompt: "Add meaning from the English word.",
     })
     .arguments({
