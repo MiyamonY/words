@@ -6,8 +6,10 @@ import { MainMenu } from "./components/Menu";
 import { Flex, View } from "@aws-amplify/ui-react";
 import { AddButton } from "./components/AddBtton";
 import { AddWordDialog } from "./components/AddWordDialog";
-
+import { createAIHooks } from "@aws-amplify/ui-react-ai";
+// import "@aws-amplify/ui-react/styles.css";
 const client = generateClient<Schema>();
+const { useAIGeneration } = createAIHooks(client);
 
 function App() {
   const [words, setWords] = useState<Array<Schema["Word"]["type"]>>([]);
@@ -20,13 +22,17 @@ function App() {
     });
   }, []);
 
+  const [{ data, isLoading }, wordDetails] = useAIGeneration("wordDetails");
+
   const addWord = (word: string) => {
-    client.models.Word.create({
-      word,
-    });
+    wordDetails({ word });
+
+    client.models.Word.create({ ...data });
 
     setOpen(false);
   };
+
+  console.log({ data });
 
   const deleteWord = (id: string) => {
     client.models.Word.delete({ id });
@@ -42,7 +48,7 @@ function App() {
           <Words words={words} onDelete={deleteWord} />
         </View>
         <View maxWidth="400px">
-          <AddButton onClick={() => setOpen(true)} />
+          <AddButton onClick={() => setOpen(true)} loading={isLoading} />
         </View>
       </Flex>
       <AddWordDialog

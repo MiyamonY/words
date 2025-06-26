@@ -13,6 +13,20 @@ const schema = a.schema({
       meaning: a.string(),
     })
     .authorization((allow) => [allow.owner()]),
+  PromptWord: a.customType({
+    word: a.string(),
+    meaning: a.string(),
+  }),
+  wordDetails: a
+    .generation({
+      aiModel: a.ai.model("Claude 3.5 Sonnet"),
+      systemPrompt: "Add meaning from the English word.",
+    })
+    .arguments({
+      word: a.string(),
+    })
+    .returns(a.ref("PromptWord"))
+    .authorization((allow) => [allow.authenticated()]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
