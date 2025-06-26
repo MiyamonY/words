@@ -5,11 +5,14 @@ import { Words } from "./components/Words";
 import { MainMenu } from "./components/Menu";
 import { Flex, View } from "@aws-amplify/ui-react";
 import { AddButton } from "./components/AddBtton";
+import { AddWordDialog } from "./components/AddWordDialog";
 
 const client = generateClient<Schema>();
 
 function App() {
   const [words, setWords] = useState<Array<Schema["Word"]["type"]>>([]);
+
+  const [open, setOpen] = useState<boolean>(false);
 
   useEffect(() => {
     client.models.Word.observeQuery().subscribe({
@@ -17,14 +20,15 @@ function App() {
     });
   }, []);
 
-  const createTodo = () => {
+  const addWord = (word: string) => {
     client.models.Word.create({
-      word: window.prompt("Word"),
-      meaning: window.prompt("Meaning"),
+      word,
     });
+
+    setOpen(false);
   };
 
-  const deleteTodo = (id: string) => {
+  const deleteWord = (id: string) => {
     client.models.Word.delete({ id });
   };
 
@@ -35,12 +39,17 @@ function App() {
           <MainMenu />
         </View>
         <View maxWidth="400px">
-          <Words words={words} onDelete={deleteTodo} />
+          <Words words={words} onDelete={deleteWord} />
         </View>
         <View maxWidth="400px">
-          <AddButton onClick={createTodo} />
+          <AddButton onClick={() => setOpen(true)} />
         </View>
       </Flex>
+      <AddWordDialog
+        onAdd={addWord}
+        onClose={() => setOpen(false)}
+        open={open}
+      />
     </View>
   );
 }
