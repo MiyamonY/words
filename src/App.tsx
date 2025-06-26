@@ -27,12 +27,16 @@ function App() {
   const addWord = (word: string) => {
     wordDetails({ word });
 
-    client.models.Word.create({ ...data });
-
     setOpen(false);
   };
 
   console.log({ data });
+
+  useEffect(() => {
+    if (data) {
+      client.models.Word.create({ ...data });
+    }
+  }, [data]);
 
   const deleteWord = (id: string) => {
     client.models.Word.delete({ id });
