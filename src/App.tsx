@@ -1,51 +1,47 @@
 import { useEffect, useState } from "react";
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
-import { useAuthenticator } from "@aws-amplify/ui-react";
-import "@aws-amplify/ui-react/styles.css";
+import { Words } from "./components/Words";
+import { MainMenu } from "./components/Menu";
+import { Flex, View } from "@aws-amplify/ui-react";
+import { AddButton } from "./components/AddBtton";
+
 const client = generateClient<Schema>();
 
 function App() {
-  const { user, signOut } = useAuthenticator();
-
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  const [words, setWords] = useState<Array<Schema["Word"]["type"]>>([]);
 
   useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
+    client.models.Word.observeQuery().subscribe({
+      next: (data) => setWords([...data.items]),
     });
   }, []);
 
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
+  const createTodo = () => {
+    client.models.Word.create({
+      word: window.prompt("Word"),
+      meaning: window.prompt("Meaning"),
+    });
+  };
 
-  function deleteTodo(id: string) {
-    client.models.Todo.delete({ id });
-  }
+  const deleteTodo = (id: string) => {
+    client.models.Word.delete({ id });
+  };
 
   return (
-    <main>
-      <h1>{user?.signInDetails?.loginId}'s todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id} onClick={() => deleteTodo(todo.id)}>
-            {todo.content}
-          </li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
-      </div>
-
-      <h2>Sign out</h2>
-      <button onClick={signOut}>Sign out</button>
-    </main>
+    <View as="main">
+      <Flex direction="column" justifyContent="center" alignItems="center">
+        <View as="header" alignSelf="end">
+          <MainMenu />
+        </View>
+        <View maxWidth="400px">
+          <Words words={words} onDelete={deleteTodo} />
+        </View>
+        <View maxWidth="400px">
+          <AddButton onClick={createTodo} />
+        </View>
+      </Flex>
+    </View>
   );
 }
 
