@@ -7,8 +7,9 @@ import { Flex, View } from "@aws-amplify/ui-react";
 import { AddButton } from "@/components/AddBtton";
 import { AddWordDialog } from "@/components/AddWordDialog";
 import { createAIHooks } from "@aws-amplify/ui-react-ai";
-// import "@aws-amplify/ui-react/styles.css";
+
 const client = generateClient<Schema>();
+
 const { useAIGeneration } = createAIHooks(client);
 
 function App() {
@@ -22,15 +23,13 @@ function App() {
     });
   }, []);
 
-  const [{ data, isLoading }, wordDetails] = useAIGeneration("wordDetails");
+  const [{ data, isLoading }, wordMeaning] = useAIGeneration("wordMeaning");
 
   const addWord = (word: string) => {
-    wordDetails({ word });
+    wordMeaning({ word });
 
     setOpen(false);
   };
-
-  console.log({ data });
 
   useEffect(() => {
     if (data) {

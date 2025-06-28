@@ -11,21 +11,57 @@ const schema = a.schema({
     .model({
       word: a.string(),
       meaning: a.string(),
+      meaningJapanese: a.string(),
+      quizes: a.hasMany("Quiz", "wordId"),
     })
     .authorization((allow) => [allow.owner()]),
-  PromptWord: a.customType({
+  Quiz: a
+    .model({
+      quiz: a.string().required(),
+      choices: a.string().array().required(),
+      answer: a.string().required(),
+      explanation: a.string().required(),
+      wordId: a.id().required(),
+      word: a.belongsTo("Word", "wordId"),
+    })
+    .authorization((allow) => [allow.owner()]),
+  WordMeaningResponse: a.customType({
     word: a.string(),
     meaning: a.string(),
+    meaningJapanese: a.string(),
   }),
-  wordDetails: a
+  QuizResponse: a.customType({
+    quiz: a.string().required(),
+    choices: a.string().required().array().required(),
+    answer: a.string().required(),
+    explanation: a.string().required(),
+  }),
+  wordMeaning: a
     .generation({
       aiModel: a.ai.model("Claude 3.5 Sonnet"),
-      systemPrompt: "Add meaning from the English word.",
+      systemPrompt:
+        "Add meaning Engish and Japanese from the given English word.",
     })
     .arguments({
       word: a.string(),
     })
-    .returns(a.ref("PromptWord"))
+    .returns(a.ref("WordMeaningResponse"))
+    .authorization((allow) => [allow.authenticated()]),
+  wordQuiz: a
+    .generation({
+      aiModel: a.ai.model("Claude 3.5 Sonnet"),
+      systemPrompt:
+        "Please create a four-option multiple-choice question where students fill in the blank in an English sentence using the specified English word, and provide an explanation for the correct answer.",
+      inferenceConfiguration: {
+        maxTokens: 1000,
+        temperature: 0.6,
+        topP: 0.9,
+      },
+    })
+    .arguments({
+      word: a.string(),
+    })
+    .returns(a.ref("QuizResponse"))
     .authorization((allow) => [allow.authenticated()]),
 });
 
