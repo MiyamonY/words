@@ -3,6 +3,7 @@ import { Flex } from "@aws-amplify/ui-react";
 import { createAIHooks } from "@aws-amplify/ui-react-ai";
 import { generateClient } from "aws-amplify/data";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { AddButton } from "@/components/AddBtton";
 import { AddWordDialog } from "@/components/AddWordDialog";
 import { Words } from "@/components/Words";
@@ -16,6 +17,8 @@ function App() {
 
   const [open, setOpen] = useState<boolean>(false);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     client.models.Word.observeQuery().subscribe({
       next: (data) => setWords([...data.items]),
@@ -26,15 +29,25 @@ function App() {
 
   const addWord = (word: string) => {
     wordMeaning({ word });
-
-    setOpen(false);
   };
 
   useEffect(() => {
-    if (data) {
-      client.models.Word.create({ ...data });
-    }
-  }, [data]);
+    (async () => {
+      if (data) {
+        const { data: word, errors } = await client.models.Word.create({
+          ...data,
+        });
+
+        if (errors || !word) {
+          console.error(errors);
+
+          return;
+        }
+
+        navigate(`/word/${word?.id}`);
+      }
+    })();
+  }, [data, navigate]);
 
   return (
     <Flex direction="column" justifyContent="center" alignItems="center">

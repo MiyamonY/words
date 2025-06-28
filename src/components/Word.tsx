@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { GiJapan as JapanIcon } from "react-icons/gi";
 import { LiaFlagUsaSolid as USAIcon } from "react-icons/lia";
 import { MdAdd as AddIcon, MdDelete as DeleteIcon } from "react-icons/md";
+import { useNavigate } from "react-router";
 import { ExampleSentenses } from "./ExampleSentenses";
 import { Quiz } from "./Quiz";
 
@@ -14,12 +15,23 @@ const client = generateClient<Schema>();
 const { useAIGeneration } = createAIHooks(client);
 
 interface Props {
-  word: Schema["Word"]["type"] | null;
-  onDelete: (id: string) => void;
+  id: string;
 }
 
 export const Word = (props: Props) => {
-  const { word, onDelete } = props;
+  const { id } = props;
+
+  const navigate = useNavigate();
+
+  const [word, setWord] = useState<Schema["Word"]["type"] | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: word } = await client.models.Word.get({ id });
+
+      setWord(word);
+    })();
+  }, [id]);
 
   const [language, setLanguage] = useState<"English" | "Japanese">("English");
 
@@ -27,10 +39,12 @@ export const Word = (props: Props) => {
 
   const [quizNo, setQuizNo] = useState<number>(1);
 
-  const handleDeleteWord = () => {
+  const handleDeleteWord = async () => {
     if (!word) return;
 
-    onDelete(word.id);
+    await client.models.Word.delete({ id: word.id });
+
+    navigate("/");
   };
 
   const hanldeOnClickLanguage = () => {
@@ -72,8 +86,8 @@ export const Word = (props: Props) => {
     })();
   }, [quiz, word]);
 
-  const hndleOnDelete = (id: string) => {
-    client.models.Quiz.delete({ id });
+  const hndleOnDelete = async (id: string) => {
+    await client.models.Quiz.delete({ id });
   };
 
   const handleNextPage = () => {
@@ -134,10 +148,11 @@ export const Word = (props: Props) => {
         <Button size="small" onClick={generateQuiz} isLoading={isLoading}>
           <AddIcon />
         </Button>
-        <Button size="small" onClick={handleDeleteWord} color="red">
-          <DeleteIcon />
-        </Button>
       </Flex>
+
+      <Button size="small" onClick={handleDeleteWord} color="red">
+        <DeleteIcon />
+      </Button>
     </Flex>
   );
 };

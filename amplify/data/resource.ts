@@ -39,7 +39,7 @@ const schema = a.schema({
     })
     .authorization((allow) => [allow.owner()]),
   WordMeaningResponse: a.customType({
-    word: a.string(),
+    word: a.string().required(),
     meaning: a.customType({
       en: a.string().required(),
       ja: a.string().required(),
