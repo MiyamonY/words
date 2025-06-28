@@ -1,23 +1,12 @@
 import type { Schema } from "@amplify/data/resource";
-import {
-  Button,
-  Flex,
-  Grid,
-  Heading,
-  Pagination,
-  Text,
-} from "@aws-amplify/ui-react";
+import { Button, Flex, Heading, Pagination, Text } from "@aws-amplify/ui-react";
 import { createAIHooks } from "@aws-amplify/ui-react-ai";
 import { generateClient } from "aws-amplify/api";
 import { useEffect, useState } from "react";
 import { GiJapan as JapanIcon } from "react-icons/gi";
 import { LiaFlagUsaSolid as USAIcon } from "react-icons/lia";
-import {
-  MdAdd as AddIcon,
-  MdOutlineCircle as CorrectIcon,
-  MdDelete as DeleteIcon,
-  MdClear as WrongIcon,
-} from "react-icons/md";
+import { MdAdd as AddIcon, MdDelete as DeleteIcon } from "react-icons/md";
+import { Quiz } from "./Quiz";
 
 const client = generateClient<Schema>();
 
@@ -36,8 +25,6 @@ export const Word = (props: Props) => {
   const [quizes, setQuizes] = useState<Schema["Quiz"]["type"][]>([]);
 
   const [quizNo, setQuizNo] = useState<number>(1);
-
-  const [answered, setAnswered] = useState<"no" | "correct" | "wrong">("no");
 
   const handleDeleteWord = () => {
     if (!word) return;
@@ -84,18 +71,22 @@ export const Word = (props: Props) => {
     })();
   }, [data, word]);
 
+  const hndleOnDelete = (id: string) => {
+    client.models.Quiz.delete({ id });
+  };
+
   const handleNextPage = () => {
     setQuizNo((prev) => prev + 1);
-    setAnswered("no");
   };
 
   const handlePreviousPage = () => {
     setQuizNo((prev) => prev - 1);
-    setAnswered("no");
   };
 
-  const handleDeleteQuiz = (id: string) => {
-    client.models.Quiz.delete({ id });
+  const handleChange = (newPageIndex?: number, _?: number) => {
+    if (newPageIndex) {
+      setQuizNo(newPageIndex);
+    }
   };
 
   return (
@@ -122,66 +113,7 @@ export const Word = (props: Props) => {
               }
 
               return (
-                <Flex key={quiz.id} direction="column">
-                  <Flex>
-                    <Text>{quiz.quiz}</Text>
-
-                    <Button
-                      size="small"
-                      onClick={() => handleDeleteQuiz(quiz.id)}
-                      color="red"
-                    >
-                      <DeleteIcon />
-                    </Button>
-                  </Flex>
-                  <Flex direction="column">
-                    {quiz.choices.map((choice, index) => (
-                      <Text
-                        key={choice}
-                        onClick={() => {
-                          if (choice === quiz.answer) {
-                            setAnswered("correct");
-                          } else {
-                            setAnswered("wrong");
-                          }
-                        }}
-                      >
-                        {`${index + 1}. ${choice}`}
-                      </Text>
-                    ))}
-                  </Flex>
-                  {(answered === "correct" || answered === "wrong") && (
-                    <Grid templateColumns="1fr 1fr 10fr" templateRows="1fr 3f">
-                      <Flex
-                        rowStart="1"
-                        rowEnd="-1"
-                        fontSize="6rem"
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        {answered === "correct" ? (
-                          <CorrectIcon color="green" />
-                        ) : (
-                          <WrongIcon color="red" />
-                        )}
-                      </Flex>
-                      <Text fontWeight="bold" columnStart="2" columnEnd="2">
-                        Answer
-                      </Text>
-                      <Text
-                        columnStart="3"
-                        columnEnd="3"
-                      >{`${quiz.answer}`}</Text>
-                      <Text fontWeight="bold" columnStart="2" columnEnd="2">
-                        Explanation
-                      </Text>
-                      <Text
-                        columnStart="3"
-                        columnEnd="3"
-                      >{`${quiz.explanation}`}</Text>
-                    </Grid>
-                  )}
-                </Flex>
+                <Quiz quiz={quiz} key={quiz.id} onDelete={hndleOnDelete} />
               );
             })}
 
@@ -191,6 +123,7 @@ export const Word = (props: Props) => {
               siblingCount={1}
               onNext={handleNextPage}
               onPrevious={handlePreviousPage}
+              onChange={handleChange}
             />
           </>
         )}
