@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   ButtonGroup,
   Flex,
@@ -17,10 +18,11 @@ interface Props {
   onAdd: (word: string) => void;
   onClose: () => void;
   open: boolean;
+  hasError: { hasError: boolean; message?: string };
 }
 
 export const AddWordDialog = (props: Props) => {
-  const { onAdd, onClose, open } = props;
+  const { onAdd, onClose, open, hasError } = props;
 
   const [word, setWord] = useState("");
 
@@ -61,6 +63,13 @@ export const AddWordDialog = (props: Props) => {
           <Button onClick={() => onClose()}>キャンセル</Button>
           <Button onClick={() => onAdd(word)}>追加</Button>
         </ButtonGroup>
+        {hasError.hasError && (
+          <Alert variation="error">
+            英単語の追加に失敗しました
+            <br />
+            {`(${hasError.message})`}
+          </Alert>
+        )}
       </Flex>
     </dialog>
   );

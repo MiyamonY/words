@@ -62,6 +62,9 @@ const schema = a.schema({
       aiModel: a.ai.model("Claude 3.5 Sonnet"),
       systemPrompt:
         "Generate meaning in Engish and Japanese of the given English word.",
+      inferenceConfiguration: {
+        maxTokens: 1000,
+      },
     })
     .arguments({
       word: a.string(),

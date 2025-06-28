@@ -17,6 +17,13 @@ function App() {
 
   const [open, setOpen] = useState<boolean>(false);
 
+  const [hasError, setHasError] = useState<{
+    hasError: boolean;
+    message?: string;
+  }>({
+    hasError: false,
+  });
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,14 +32,28 @@ function App() {
     });
   }, []);
 
-  const [{ data, isLoading }, wordMeaning] = useAIGeneration("wordMeaning");
+  // Though return value 'messages' is deprecated, error messages are in it.
+  const [{ data, isLoading, messages }, wordMeaning] =
+    useAIGeneration("wordMeaning");
 
   const addWord = (word: string) => {
-    wordMeaning({ word });
+    try {
+      wordMeaning({ word });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
     (async () => {
+      console.log(messages);
+
+      if (messages && messages?.length > 0) {
+        setHasError({ hasError: true, message: messages[0].message });
+
+        return;
+      }
+
       if (data) {
         const { data: word, errors } = await client.models.Word.create({
           ...data,
@@ -47,7 +68,7 @@ function App() {
         navigate(`/word/${word?.id}`);
       }
     })();
-  }, [data, navigate]);
+  }, [data, navigate, messages]);
 
   return (
     <Flex direction="column" justifyContent="center" alignItems="center">
@@ -57,6 +78,7 @@ function App() {
         onAdd={addWord}
         onClose={() => setOpen(false)}
         open={open}
+        hasError={hasError}
       />
     </Flex>
   );
