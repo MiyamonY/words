@@ -1,16 +1,13 @@
-import { useEffect, useState } from "react";
 import type { Schema } from "@amplify/data/resource";
 import { generateClient } from "aws-amplify/api";
-import { Word } from "@/components/Word";
+import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router";
+import { Word } from "@/components/Word";
+
 const client = generateClient<Schema>();
 
 const Page = () => {
   const { id } = useParams();
-
-  if (!id) {
-    return <Navigate to="/404" />;
-  }
 
   const [word, setWord] = useState<Schema["Word"]["type"] | null>(null);
 
@@ -21,6 +18,10 @@ const Page = () => {
       setWord(word);
     })();
   }, [id]);
+
+  if (!id) {
+    return <Navigate to="/404" />;
+  }
 
   const deleteWord = (id: string) => {
     client.models.Word.delete({ id });

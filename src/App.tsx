@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
 import type { Schema } from "@amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
-import { Words } from "@/components/Words";
-import { MainMenu } from "@/components/Menu";
 import { Flex, View } from "@aws-amplify/ui-react";
+import { createAIHooks } from "@aws-amplify/ui-react-ai";
+import { generateClient } from "aws-amplify/data";
+import { useEffect, useState } from "react";
 import { AddButton } from "@/components/AddBtton";
 import { AddWordDialog } from "@/components/AddWordDialog";
-import { createAIHooks } from "@aws-amplify/ui-react-ai";
+import { MainMenu } from "@/components/Menu";
+import { Words } from "@/components/Words";
 
 const client = generateClient<Schema>();
 

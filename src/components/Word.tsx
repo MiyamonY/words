@@ -10,12 +10,14 @@ import {
 import { createAIHooks } from "@aws-amplify/ui-react-ai";
 import { generateClient } from "aws-amplify/api";
 import { useEffect, useState } from "react";
-import { MdDelete as DeleteIcon } from "react-icons/md";
-import { LiaFlagUsaSolid as USAIcon } from "react-icons/lia";
 import { GiJapan as JapanIcon } from "react-icons/gi";
-import { MdAdd as AddIcon } from "react-icons/md";
-import { MdOutlineCircle as CorrectIcon } from "react-icons/md";
-import { MdClear as WrongIcon } from "react-icons/md";
+import { LiaFlagUsaSolid as USAIcon } from "react-icons/lia";
+import {
+  MdAdd as AddIcon,
+  MdOutlineCircle as CorrectIcon,
+  MdDelete as DeleteIcon,
+  MdClear as WrongIcon,
+} from "react-icons/md";
 
 const client = generateClient<Schema>();
 
@@ -80,7 +82,7 @@ export const Word = (props: Props) => {
         });
       }
     })();
-  }, [data]);
+  }, [data, word]);
 
   const handleNextPage = () => {
     setQuizNo((prev) => prev + 1);
@@ -135,7 +137,7 @@ export const Word = (props: Props) => {
                   <Flex direction="column">
                     {quiz.choices.map((choice, index) => (
                       <Text
-                        key={index}
+                        key={choice}
                         onClick={() => {
                           if (choice === quiz.answer) {
                             setAnswered("correct");

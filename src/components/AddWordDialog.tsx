@@ -5,7 +5,13 @@ import {
   Heading,
   TextField,
 } from "@aws-amplify/ui-react";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface Props {
   onAdd: (word: string) => void;
@@ -20,13 +26,13 @@ export const AddWordDialog = (props: Props) => {
 
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const show = () => {
+  const show = useCallback(() => {
     dialogRef.current?.showModal();
-  };
+  }, []);
 
-  const close = () => {
+  const close = useCallback(() => {
     dialogRef.current?.close();
-  };
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -34,7 +40,7 @@ export const AddWordDialog = (props: Props) => {
     } else {
       close();
     }
-  }, [open]);
+  }, [open, show, close]);
 
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     setWord(e.target.value);
