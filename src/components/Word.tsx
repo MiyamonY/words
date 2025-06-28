@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { GiJapan as JapanIcon } from "react-icons/gi";
 import { LiaFlagUsaSolid as USAIcon } from "react-icons/lia";
 import { MdAdd as AddIcon, MdDelete as DeleteIcon } from "react-icons/md";
+import { ExampleSentenses } from "./ExampleSentenses";
 import { Quiz } from "./Quiz";
 
 const client = generateClient<Schema>();
@@ -52,7 +53,7 @@ export const Word = (props: Props) => {
     }
   }, [word]);
 
-  const [{ data, isLoading }, wordQuiz] = useAIGeneration("wordQuiz");
+  const [{ data: quiz, isLoading }, wordQuiz] = useAIGeneration("wordQuiz");
 
   const generateQuiz = () => {
     if (!word) return;
@@ -62,14 +63,14 @@ export const Word = (props: Props) => {
 
   useEffect(() => {
     (async () => {
-      if (data && !!word) {
+      if (quiz && !!word) {
         await client.models.Quiz.create({
-          ...data,
+          ...quiz,
           wordId: word.id,
         });
       }
     })();
-  }, [data, word]);
+  }, [quiz, word]);
 
   const hndleOnDelete = (id: string) => {
     client.models.Quiz.delete({ id });
@@ -103,6 +104,9 @@ export const Word = (props: Props) => {
         </Button>
       </Flex>
 
+      <Heading level={4}>Examples</Heading>
+      <ExampleSentenses word={word} />
+
       <Heading level={4}>Quiz</Heading>
       <Flex direction="column">
         {quizes.length > 0 && (
@@ -130,11 +134,10 @@ export const Word = (props: Props) => {
         <Button size="small" onClick={generateQuiz} isLoading={isLoading}>
           <AddIcon />
         </Button>
+        <Button size="small" onClick={handleDeleteWord} color="red">
+          <DeleteIcon />
+        </Button>
       </Flex>
-
-      <Button size="small" onClick={handleDeleteWord} color="red">
-        <DeleteIcon />
-      </Button>
     </Flex>
   );
 };

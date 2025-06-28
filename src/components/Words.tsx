@@ -34,7 +34,7 @@ export const Words = (props: Props) => {
         {words.map(({ id, word, meaning }) => (
           <TableRow key={id} onClick={() => handleOnClick(id)}>
             <TableCell>{word}</TableCell>
-            <TableCell>{meaning}</TableCell>
+            <TableCell>{meaning?.en}</TableCell>
           </TableRow>
         ))}
       </TableBody>

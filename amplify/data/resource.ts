@@ -14,7 +14,18 @@ const schema = a.schema({
         en: a.string().required(),
         ja: a.string().required(),
       }),
+      examples: a.hasMany("ExampleSentense", "wordId"),
       quizes: a.hasMany("Quiz", "wordId"),
+    })
+    .authorization((allow) => [allow.owner()]),
+  ExampleSentense: a
+    .model({
+      sentense: a.customType({
+        en: a.string().required(),
+        ja: a.string().required(),
+      }),
+      wordId: a.id().required(),
+      word: a.belongsTo("Word", "wordId"),
     })
     .authorization((allow) => [allow.owner()]),
   Quiz: a
@@ -34,6 +45,12 @@ const schema = a.schema({
       ja: a.string().required(),
     }),
   }),
+  ExampleSentenseResponse: a.customType({
+    sentense: a.customType({
+      en: a.string().required(),
+      ja: a.string().required(),
+    }),
+  }),
   QuizResponse: a.customType({
     quiz: a.string().required(),
     choices: a.string().required().array().required(),
@@ -44,12 +61,23 @@ const schema = a.schema({
     .generation({
       aiModel: a.ai.model("Claude 3.5 Sonnet"),
       systemPrompt:
-        "Add meaning Engish and Japanese from the given English word.",
+        "Generate meaning in Engish and Japanese of the given English word.",
     })
     .arguments({
       word: a.string(),
     })
     .returns(a.ref("WordMeaningResponse"))
+    .authorization((allow) => [allow.authenticated()]),
+  exampleSentense: a
+    .generation({
+      aiModel: a.ai.model("Claude 3.5 Sonnet"),
+      systemPrompt:
+        "Generate an example sentense in Engish and Japanese of the given English word.",
+    })
+    .arguments({
+      word: a.string(),
+    })
+    .returns(a.ref("ExampleSentenseResponse"))
     .authorization((allow) => [allow.authenticated()]),
   wordQuiz: a
     .generation({
