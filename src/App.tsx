@@ -1,11 +1,10 @@
 import type { Schema } from "@amplify/data/resource";
-import { Flex, View } from "@aws-amplify/ui-react";
+import { Flex } from "@aws-amplify/ui-react";
 import { createAIHooks } from "@aws-amplify/ui-react-ai";
 import { generateClient } from "aws-amplify/data";
 import { useEffect, useState } from "react";
 import { AddButton } from "@/components/AddBtton";
 import { AddWordDialog } from "@/components/AddWordDialog";
-import { MainMenu } from "@/components/Menu";
 import { Words } from "@/components/Words";
 
 const client = generateClient<Schema>();
@@ -38,24 +37,15 @@ function App() {
   }, [data]);
 
   return (
-    <View as="main">
-      <Flex direction="column" justifyContent="center" alignItems="center">
-        <View as="header" alignSelf="end">
-          <MainMenu />
-        </View>
-        <View maxWidth="400px">
-          <Words words={words} />
-        </View>
-        <View maxWidth="400px">
-          <AddButton onClick={() => setOpen(true)} loading={isLoading} />
-        </View>
-      </Flex>
+    <Flex direction="column" justifyContent="center" alignItems="center">
+      <Words words={words} />
+      <AddButton onClick={() => setOpen(true)} loading={isLoading} />
       <AddWordDialog
         onAdd={addWord}
         onClose={() => setOpen(false)}
         open={open}
       />
-    </View>
+    </Flex>
   );
 }
 

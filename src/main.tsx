@@ -3,11 +3,9 @@ import { Amplify } from "aws-amplify";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import outputs from "../amplify_outputs.json";
-import App from "./App";
 import "@aws-amplify/ui-react/styles.css";
 import { ThemeProvider } from "@aws-amplify/ui-react";
-import { BrowserRouter, Route, Routes } from "react-router";
-import Word from "./Word";
+import { Router } from "./router";
 
 Amplify.configure(outputs);
 
@@ -16,12 +14,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider>
       <Authenticator hideSignUp>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/word/:id" element={<Word />} />
-          </Routes>
-        </BrowserRouter>
+        <Router />
       </Authenticator>
     </ThemeProvider>
   </React.StrictMode>,
