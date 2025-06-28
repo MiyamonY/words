@@ -2,8 +2,10 @@ import type { Schema } from "@amplify/data/resource";
 import { Button, Flex, Text } from "@aws-amplify/ui-react";
 import { createAIHooks } from "@aws-amplify/ui-react-ai";
 import { generateClient } from "aws-amplify/api";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { MdAdd as AddIcon, MdDelete as DeleteIcon } from "react-icons/md";
+import { jaAtom } from "@/storage";
 
 const client = generateClient<Schema>();
 
@@ -15,6 +17,8 @@ interface Props {
 
 export const ExampleSentenses = (props: Props) => {
   const { word } = props;
+
+  const [ja] = useAtom(jaAtom);
 
   const [{ data: sentense, isLoading }, exampleSentense] =
     useAIGeneration("exampleSentense");
@@ -60,11 +64,18 @@ export const ExampleSentenses = (props: Props) => {
     <Flex direction="column">
       {sentenses.map(({ id, sentense }, index) => {
         return (
-          <Flex direction="row" key={id}>
-            <Text>{`${index + 1}. ${sentense?.en}`}</Text>
-            <Button size="small" onClick={() => handleOnDelete(id)} color="red">
-              <DeleteIcon />
-            </Button>
+          <Flex direction="column" key={id}>
+            <Flex direction="row">
+              <Text>{`${index + 1}. ${sentense?.en}`}</Text>
+              <Button
+                size="small"
+                onClick={() => handleOnDelete(id)}
+                color="red"
+              >
+                <DeleteIcon />
+              </Button>
+            </Flex>
+            {ja && <Text>{sentense?.ja}</Text>}
           </Flex>
         );
       })}

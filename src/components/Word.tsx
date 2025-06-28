@@ -2,11 +2,11 @@ import type { Schema } from "@amplify/data/resource";
 import { Button, Flex, Heading, Pagination, Text } from "@aws-amplify/ui-react";
 import { createAIHooks } from "@aws-amplify/ui-react-ai";
 import { generateClient } from "aws-amplify/api";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { GiJapan as JapanIcon } from "react-icons/gi";
-import { LiaFlagUsaSolid as USAIcon } from "react-icons/lia";
 import { MdAdd as AddIcon, MdDelete as DeleteIcon } from "react-icons/md";
 import { useNavigate } from "react-router";
+import { jaAtom } from "@/storage";
 import { ExampleSentenses } from "./ExampleSentenses";
 import { Quiz } from "./Quiz";
 
@@ -21,6 +21,8 @@ interface Props {
 export const Word = (props: Props) => {
   const { id } = props;
 
+  const [ja] = useAtom(jaAtom);
+
   const navigate = useNavigate();
 
   const [word, setWord] = useState<Schema["Word"]["type"] | null>(null);
@@ -33,8 +35,6 @@ export const Word = (props: Props) => {
     })();
   }, [id]);
 
-  const [language, setLanguage] = useState<"English" | "Japanese">("English");
-
   const [quizes, setQuizes] = useState<Schema["Quiz"]["type"][]>([]);
 
   const [quizNo, setQuizNo] = useState<number>(1);
@@ -45,14 +45,6 @@ export const Word = (props: Props) => {
     await client.models.Word.delete({ id: word.id });
 
     navigate("/");
-  };
-
-  const hanldeOnClickLanguage = () => {
-    if (language === "English") {
-      setLanguage("Japanese");
-    } else {
-      setLanguage("English");
-    }
   };
 
   useEffect(() => {
@@ -109,13 +101,9 @@ export const Word = (props: Props) => {
       <Heading level={1}>{word?.word}</Heading>
 
       <Heading level={4}>Meaning</Heading>
-      <Flex>
-        <Text>
-          {language === "English" ? word?.meaning?.en : word?.meaning?.ja}
-        </Text>
-        <Button onClick={hanldeOnClickLanguage}>
-          {language === "English" ? <USAIcon /> : <JapanIcon />}
-        </Button>
+      <Flex direction="column" alignItems="center">
+        <Text>{word?.meaning?.en}</Text>
+        {ja && <Text>{word?.meaning?.ja}</Text>}
       </Flex>
 
       <Heading level={4}>Examples</Heading>
