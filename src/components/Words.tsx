@@ -1,6 +1,5 @@
-import type { Schema } from "../../amplify/data/resource";
+import type { Schema } from "@amplify/data/resource";
 import {
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -8,35 +7,34 @@ import {
   TableRow,
 } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { MdDelete as DeleteIcon } from "react-icons/md";
+import { useNavigate } from "react-router";
 
 interface Props {
   words: Array<Schema["Word"]["type"]>;
-  onDelete: (id: string) => void;
 }
 
 export const Words = (props: Props) => {
-  const { words, onDelete } = props;
+  const { words } = props;
+
+  const navigate = useNavigate();
+
+  const handleOnClick = (id: string) => {
+    navigate(`/word/${id}`);
+  };
 
   return (
-    <Table caption="" highlightOnHover={false}>
+    <Table highlightOnHover variation="striped">
       <TableHead>
         <TableRow>
           <TableCell as="th">単語</TableCell>
           <TableCell as="th">意味</TableCell>
-          <TableCell as="th">操作</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {words.map((todo) => (
-          <TableRow key={todo.id}>
-            <TableCell>{todo.word}</TableCell>
-            <TableCell>{todo.meaning}</TableCell>
-            <TableCell>
-              <Button size="small" onClick={() => onDelete(todo.id)}>
-                <DeleteIcon />
-              </Button>
-            </TableCell>
+        {words.map(({ id, word, meaning }) => (
+          <TableRow key={id} onClick={() => handleOnClick(id)}>
+            <TableCell>{word}</TableCell>
+            <TableCell>{meaning}</TableCell>
           </TableRow>
         ))}
       </TableBody>

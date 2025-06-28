@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
+import type { Schema } from "@amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
-import { Words } from "./components/Words";
-import { MainMenu } from "./components/Menu";
+import { Words } from "@/components/Words";
+import { MainMenu } from "@/components/Menu";
 import { Flex, View } from "@aws-amplify/ui-react";
-import { AddButton } from "./components/AddBtton";
-import { AddWordDialog } from "./components/AddWordDialog";
+import { AddButton } from "@/components/AddBtton";
+import { AddWordDialog } from "@/components/AddWordDialog";
 import { createAIHooks } from "@aws-amplify/ui-react-ai";
 // import "@aws-amplify/ui-react/styles.css";
 const client = generateClient<Schema>();
@@ -38,10 +38,6 @@ function App() {
     }
   }, [data]);
 
-  const deleteWord = (id: string) => {
-    client.models.Word.delete({ id });
-  };
-
   return (
     <View as="main">
       <Flex direction="column" justifyContent="center" alignItems="center">
@@ -49,7 +45,7 @@ function App() {
           <MainMenu />
         </View>
         <View maxWidth="400px">
-          <Words words={words} onDelete={deleteWord} />
+          <Words words={words} />
         </View>
         <View maxWidth="400px">
           <AddButton onClick={() => setOpen(true)} loading={isLoading} />
