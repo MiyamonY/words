@@ -9,9 +9,11 @@ specifies that any user authenticated via an API key can "create", "read",
 const schema = a.schema({
   Word: a
     .model({
-      word: a.string(),
-      meaning: a.string(),
-      meaningJapanese: a.string(),
+      word: a.string().required(),
+      meaning: a.customType({
+        en: a.string().required(),
+        ja: a.string().required(),
+      }),
       quizes: a.hasMany("Quiz", "wordId"),
     })
     .authorization((allow) => [allow.owner()]),
@@ -27,8 +29,10 @@ const schema = a.schema({
     .authorization((allow) => [allow.owner()]),
   WordMeaningResponse: a.customType({
     word: a.string(),
-    meaning: a.string(),
-    meaningJapanese: a.string(),
+    meaning: a.customType({
+      en: a.string().required(),
+      ja: a.string().required(),
+    }),
   }),
   QuizResponse: a.customType({
     quiz: a.string().required(),

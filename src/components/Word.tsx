@@ -96,7 +96,7 @@ export const Word = (props: Props) => {
       <Heading level={4}>Meaning</Heading>
       <Flex>
         <Text>
-          {language === "English" ? word?.meaning : word?.meaningJapanese}
+          {language === "English" ? word?.meaning?.en : word?.meaning?.ja}
         </Text>
         <Button onClick={hanldeOnClickLanguage}>
           {language === "English" ? <USAIcon /> : <JapanIcon />}
