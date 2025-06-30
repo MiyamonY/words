@@ -89,8 +89,6 @@ const schema = a.schema({
         "Please create a four-option multiple-choice question where students fill in the blank in an English sentence using the specified English word, and provide an explanation for the correct answer.",
       inferenceConfiguration: {
         maxTokens: 1000,
-        temperature: 0.6,
-        topP: 0.9,
       },
     })
     .arguments({
