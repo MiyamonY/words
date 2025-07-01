@@ -18,11 +18,12 @@ interface Props {
   onAdd: (word: string) => void;
   onClose: () => void;
   open: boolean;
-  hasError: { hasError: boolean; message?: string };
+  loading: boolean;
+  hasError: { hasError: false } | { hasError: true; message: string };
 }
 
 export const AddWordDialog = (props: Props) => {
-  const { onAdd, onClose, open, hasError } = props;
+  const { onAdd, onClose, open, loading, hasError } = props;
 
   const [word, setWord] = useState("");
 
@@ -60,8 +61,12 @@ export const AddWordDialog = (props: Props) => {
           isRequired
         />
         <ButtonGroup justifyContent="center">
-          <Button onClick={() => onClose()}>キャンセル</Button>
-          <Button onClick={() => onAdd(word)}>追加</Button>
+          <Button onClick={() => onClose()} isLoading={loading}>
+            キャンセル
+          </Button>
+          <Button onClick={() => onAdd(word)} isLoading={loading}>
+            追加
+          </Button>
         </ButtonGroup>
         {hasError.hasError && (
           <Alert variation="error">

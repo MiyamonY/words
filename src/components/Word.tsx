@@ -8,6 +8,7 @@ import { MdAdd as AddIcon, MdDelete as DeleteIcon } from "react-icons/md";
 import { useNavigate } from "react-router";
 import { jaAtom } from "@/storage";
 import { ExampleSentenses } from "./ExampleSentenses";
+import { Images } from "./Images";
 import { Quiz } from "./Quiz";
 
 const client = generateClient<Schema>();
@@ -106,6 +107,9 @@ export const Word = (props: Props) => {
         {ja && <Text>{word?.meaning?.ja}</Text>}
       </Flex>
 
+      <Heading level={4}>Image</Heading>
+      <Images word={word} />
+
       <Heading level={4}>Examples</Heading>
       <ExampleSentenses word={word} />
 
@@ -137,7 +141,6 @@ export const Word = (props: Props) => {
           <AddIcon />
         </Button>
       </Flex>
-
       <Button size="small" onClick={handleDeleteWord} color="red">
         <DeleteIcon />
       </Button>
