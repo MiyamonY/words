@@ -1,5 +1,6 @@
 import { a, type ClientSchema, defineData } from "@aws-amplify/backend";
 import { genWord } from "../functions/gen-word/resource";
+import { wordStream } from "../functions/word-stream/resource";
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -94,7 +95,10 @@ const schema = a
       .returns(a.ref("QuizResponse"))
       .authorization((allow) => [allow.authenticated()]),
   })
-  .authorization((allow) => [allow.resource(genWord)]);
+  .authorization((allow) => [
+    allow.resource(genWord),
+    allow.resource(wordStream),
+  ]);
 
 export type Schema = ClientSchema<typeof schema>;
 

@@ -1,12 +1,13 @@
 import { defineStorage } from "@aws-amplify/backend";
-import { genWord } from "../functions/gen-word/resource";
+import { wordStream } from "../functions/word-stream/resource";
 
 export const storage = defineStorage({
   name: "wordsapp",
   access: (allow) => ({
     "images/*": [
-      allow.authenticated.to(['read']),
-      allow.resource(genWord).to(["read", "write", "delete"])],
+      allow.authenticated.to(["read"]),
+      allow.resource(wordStream).to(["read", "write", "delete"]),
+    ],
   }),
   isDefault: true,
 });

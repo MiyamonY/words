@@ -1,30 +1,30 @@
 import { env } from "$amplify/env/gen-word";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
+import { Logger } from "@aws-lambda-powertools/logger";
 import {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/api";
 import type { Schema } from "../../data/resource";
 
-const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(
-  env
-);
-
-const Bucket = env.WORDSAPP_BUCKET_NAME;
+const { resourceConfig, libraryOptions } =
+  await getAmplifyDataClientConfig(env);
 
 Amplify.configure(resourceConfig, libraryOptions);
 
 const appClient = generateClient<Schema>();
 
-const s3Client = new S3Client();
-
 const bedrockClient = new BedrockRuntimeClient();
 
+const logger = new Logger({
+  logLevel: "DEBUG",
+  serviceName: "gen-word",
+});
+
 export const handler: Schema["genWord"]["functionHandler"] = async (event) => {
-  console.log("Event:", JSON.stringify(event, null, 2));
+  logger.info("Event:", JSON.stringify(event, null, 2));
 
   const word = event.arguments.word ?? "";
 
@@ -41,20 +41,9 @@ export const handler: Schema["genWord"]["functionHandler"] = async (event) => {
       throw new Error(errors[0].message);
     }
 
-    const key = await generateImage(word);
-
-    const { errors: imageErrors } = await appClient.models.Image.create({
-      wordId: data?.id ?? "",
-      path: key,
-    });
-
-    if (imageErrors && imageErrors.length > 0) {
-      throw new Error(imageErrors[0].message);
-    }
-
     return data;
   } catch (error) {
-    console.error("Error generating image:", error);
+    logger.error(`Error generating image: ${error}`);
 
     throw error;
   }
@@ -88,60 +77,10 @@ const generateMeaning = async (word: string) => {
 
   const text = body.content[0].text.replace(/\r?\n/g, "");
 
-  console.log("generateMeaning", { text });
-
   return {
     en: extractTagValue(text, "en") ?? "",
     ja: extractTagValue(text, "ja") ?? "",
   };
-};
-
-const generateImage = async (word: string) => {
-  const prompt = `Please generate an image based on ${word} following these guidelines:
-- Visually depict what ${word} represents or means
-- Do not include the actual word text in the image
-- Design it to be memorable and helpful for English language learning`;
-
-  const command = new InvokeModelCommand({
-    modelId: "amazon.nova-canvas-v1:0",
-    body: JSON.stringify({
-      taskType: "TEXT_IMAGE",
-      textToImageParams: {
-        text: prompt,
-      },
-      imageGenerationConfig: {
-        width: 320,
-        height: 320,
-        seed: Math.floor(Math.random() * 858993460),
-        quality: "standard",
-      },
-    }),
-  });
-
-  const response = await bedrockClient.send(command);
-
-  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-
-  if (!responseBody.images || responseBody.images.length === 0) {
-    throw new Error("No images generated");
-  }
-
-  const imageBase64 = responseBody.images[0];
-
-  const imageBuffer = Buffer.from(imageBase64, "base64");
-
-  const key = `images/${word}-${Date.now()}.png`;
-
-  const uploadCommand = new PutObjectCommand({
-    Bucket,
-    Key: key,
-    Body: imageBuffer,
-    ContentType: "image/png",
-  });
-
-  await s3Client.send(uploadCommand);
-
-  return key;
 };
 
 const extractTagValue = (text: string, tagName: string): string | undefined => {

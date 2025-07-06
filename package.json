@@ -25,7 +25,9 @@
   "devDependencies": {
     "@aws-amplify/backend": "^1.16.1",
     "@aws-amplify/backend-cli": "^1.8.0",
+    "@aws-lambda-powertools/logger": "^2.23.0",
     "@biomejs/biome": "2.0.6",
+    "@types/aws-lambda": "^8.10.150",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
