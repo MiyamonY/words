@@ -24,7 +24,7 @@ const logger = new Logger({
 });
 
 export const handler: Schema["genWord"]["functionHandler"] = async (event) => {
-  logger.info("Event:", JSON.stringify(event, null, 2));
+  logger.info("Event:", { data: event });
 
   const word = event.arguments.word ?? "";
 
