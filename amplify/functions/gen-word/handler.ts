@@ -52,6 +52,7 @@ export const handler: Schema["genWord"]["functionHandler"] = async (event) => {
 const generateMeaning = async (word: string) => {
   const prompt = `Please provide the meaning of the word "${word}" in both English and Japanese. Following these guidelines:
 - Provide concise and clear definitions
+- Include definitions of the word only
 - Output format below
 
 <en>[English explanation here]</en>
