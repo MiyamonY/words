@@ -29,11 +29,8 @@ export const handler: Schema["genWord"]["functionHandler"] = async (event) => {
   const word = event.arguments.word ?? "";
 
   try {
-    const meaning = await generateMeaning(word);
-
     const { data, errors } = await appClient.models.Word.create({
       word,
-      meaning,
       // owner: (event?.identity as { username: string }).username, // AppSyncIdentityCognito
     });
 
@@ -49,45 +46,3 @@ export const handler: Schema["genWord"]["functionHandler"] = async (event) => {
   }
 };
 
-const generateMeaning = async (word: string) => {
-  const prompt = `Please provide the meaning of the word "${word}" in both English and Japanese. Following these guidelines:
-- Provide concise and clear definitions
-- Include definitions of the word only
-- Output format below
-
-<en>[English explanation here]</en>
-<ja>[Japanese explanation here]</ja>`;
-
-  const command = new InvokeModelCommand({
-    modelId: "apac.anthropic.claude-3-7-sonnet-20250219-v1:0",
-    body: JSON.stringify({
-      anthropic_version: "bedrock-2023-05-31",
-      max_tokens: 1000,
-      messages: [
-        {
-          role: "user",
-          content: [{ type: "text", text: prompt }],
-        },
-      ],
-    }),
-  });
-
-  const res = await bedrockClient.send(command);
-
-  const body = JSON.parse(Buffer.from(res.body).toString("utf-8"));
-
-  const text = body.content[0].text.replace(/\r?\n/g, "");
-
-  return {
-    en: extractTagValue(text, "en") ?? "",
-    ja: extractTagValue(text, "ja") ?? "",
-  };
-};
-
-const extractTagValue = (text: string, tagName: string): string | undefined => {
-  const regex = new RegExp(`<${tagName}>(.*?)</${tagName}>`, "i");
-
-  const match = text.match(regex);
-
-  return match ? match[1] : undefined;
-};

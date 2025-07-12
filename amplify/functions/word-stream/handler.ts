@@ -56,7 +56,7 @@ const handleRecord = async (record: DynamoDBRecord) => {
   if (!newImage) {
     logger.error(`New image is undefined`);
 
-    return;
+    throw new Error("new image is null");
   }
 
   const id = newImage.id.S;
@@ -65,10 +65,39 @@ const handleRecord = async (record: DynamoDBRecord) => {
 
   logger.debug(`id:${id}, word:${word}`);
 
-  const key = await generateImage(word ?? "");
+  if (!id || !word) {
+    logger.error(`id or word is null`, { data: { id, word } });
+
+    throw new Error("word is null");
+  }
+
+  await updateMeaning(id, word);
+
+  await createImage(id, word);
+
+  logger.info("success");
+};
+
+const updateMeaning = async (id: string, word: string) => {
+  const meaning = await generateMeaning(word);
+
+  const { errors } = await appClient.models.Word.update({
+    id,
+    meaning,
+  });
+
+  if (errors && errors.length > 0) {
+    logger.error("app client error", errors[0] as unknown as Error);
+
+    throw new Error(errors[0].message);
+  }
+};
+
+const createImage = async (id: string, word: string) => {
+  const key = await generateImage(word);
 
   const { errors } = await appClient.models.Image.create({
-    wordId: id ?? "",
+    wordId: id,
     path: key,
   });
 
@@ -77,6 +106,41 @@ const handleRecord = async (record: DynamoDBRecord) => {
 
     throw new Error(errors[0].message);
   }
+};
+
+const generateMeaning = async (word: string) => {
+  const prompt = `Please provide the meaning of the word "${word}" in both English and Japanese. Following these guidelines:
+- Provide concise and clear definitions
+- Include definitions of the word only
+- Output format below
+
+<en>[English explanation here]</en>
+<ja>[Japanese explanation here]</ja>`;
+
+  const command = new InvokeModelCommand({
+    modelId: "apac.anthropic.claude-3-7-sonnet-20250219-v1:0",
+    body: JSON.stringify({
+      anthropic_version: "bedrock-2023-05-31",
+      max_tokens: 1000,
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "text", text: prompt }],
+        },
+      ],
+    }),
+  });
+
+  const res = await bedrockClient.send(command);
+
+  const body = JSON.parse(Buffer.from(res.body).toString("utf-8"));
+
+  const text = body.content[0].text.replace(/\r?\n/g, "");
+
+  return {
+    en: extractTagValue(text, "en") ?? "",
+    ja: extractTagValue(text, "ja") ?? "",
+  };
 };
 
 const generateImageDescription = async (word: string) => {
